@@ -1,0 +1,17 @@
+{
+  "name": "macd_testing",
+  "version": "1.0.0",
+  "description": "this is for testing MACD",
+  "main": "MACD_Testing.mjs",
+  "scripts": {
+    "test": "node MACD_Testing.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.5",
+    "moment": "^2.30.1"
+  }
+}
