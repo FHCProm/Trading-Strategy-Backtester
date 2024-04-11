@@ -2,6 +2,7 @@ import moment from "moment";
 import cryptoJs from "crypto-js";
 import dotenv from "dotenv";
 import axios from "axios";
+import { MACD_backtest } from "./trading-utils/MACD_test.mjs";
 
 dotenv.config();
 const api_secret = process.env.API_SECRET;
@@ -239,16 +240,18 @@ async function SortingKlinesAndCalculateEMA(unsortedKlines) {
 let sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function backtester() {
-  let total1Min = 100;
+  let totalBars = 1000;
   let symbol = "BTCUSD";
 
   testerKlines = await fetchListOfKlines({
     symbol: symbol,
-    resolution: 300,
-    totalBarToFetch: total1Min,
+    resolution: 1800,
+    totalBarToFetch: totalBars,
   });
 
-  console.log(testerKlines);
+  MACD_backtest(testerKlines);
+  // console.table(testerKlines);
+  // console.log(testerKlines[495][10]);
 }
 
 backtester();

@@ -1,0 +1,37 @@
+
+//----------------WHAT KLINE looks like now?--------------------//
+
+// [
+//     <timestamp>,     0
+//     "<interval>",    1
+//     <lastCloseEp>,   2
+//     <openEp>,        3
+//     <highEp>,        4
+//     <lowEp>,         5
+//     <closeEp>,       6
+//     <volume>,        7
+//     <turnoverEv>,    8
+//     <EMA200>,        9
+//     <MACD>           10
+//
+//
+//   ]
+
+
+
+
+//-------------------Limit order visual---------------------//
+/**
+ *  {
+ *      timestamp:32342434,
+ *      transactionType:"sell",
+ *      openPosition:232132,
+ *      takeProfit:3323234,
+ *      stopLoss:32133213,
+ *      zoneUpperBoundary:2323213,
+ *      zoneLowerBoundary:13213213,
+ *
+ *
+ * }
+ *
+ * */
