@@ -240,12 +240,12 @@ async function SortingKlinesAndCalculateEMA(unsortedKlines) {
 let sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function backtester() {
-  let totalBars = 1000;
+  let totalBars = 10000;
   let symbol = "BTCUSD";
 
   testerKlines = await fetchListOfKlines({
     symbol: symbol,
-    resolution: 1800,
+    resolution: 3600,
     totalBarToFetch: totalBars,
   });
 
