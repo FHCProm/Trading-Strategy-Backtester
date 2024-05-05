@@ -3,6 +3,7 @@ import cryptoJs from "crypto-js";
 import dotenv from "dotenv";
 import axios from "axios";
 import { MACD_backtest } from "./trading-utils/MACD_test.mjs";
+import { Api_Request } from "./model/api_manager";
 
 dotenv.config();
 const api_secret = process.env.API_SECRET;
@@ -34,8 +35,9 @@ async function fetchListOfKlines({ symbol, resolution, totalBarToFetch }) {
   const currentTime = moment().format("X");
 
   let sequence = 0;
-  let toBeConvertedToAxios = [];
+  let raw_requests = [];
 
+  //identify the time range that need to be fetched
   for (let x = startingTime; x < currentTime; ) {
     let from = x;
     let to = moment(x, "X")
@@ -45,22 +47,20 @@ async function fetchListOfKlines({ symbol, resolution, totalBarToFetch }) {
       to = currentTime;
     }
 
-    const path = "/exchange/public/md/kline";
-    const query = `symbol=${symbol}&to=${to}&from=${from}&resolution=${resolution}`;
-    const body = "";
+    const api_request = new Api_Request();
+    let kline_api_request = api_request.constructKlineRequest(
+      symbol,
+      to,
+      from,
+      resolution
+    );
 
-    toBeConvertedToAxios.push({
-      path: path,
-      query: query,
-      body: "",
-      phemexRequestType: "Others",
-      sequence: sequence,
-    });
+    raw_requests.push({ kline_api_request });
     sequence++;
     x = to;
   }
 
-  let unsortedKlines = await multipleAxiosRequest(toBeConvertedToAxios);
+  let unsortedKlines = await multipleAxiosRequest(raw_requests);
 
   let sortedKlines = SortingKlinesAndCalculateEMA(unsortedKlines);
   return sortedKlines;
@@ -99,20 +99,22 @@ async function modifyAxiosInstance({ path, query, body }) {
   return promise;
 }
 
+//Refactoring stopped here..
+
 async function multipleAxiosRequest(requestArray) {
   //after separated 5 arrays
 
-  let array3 = [];
+  let fiveRequests = [];
   let retryList = [];
   let unsortedKlines = [];
   for (let x = 0; x < requestArray.length; x++) {
     if (await verifyRemainingRateLimit(otherRateLimit)) {
       otherRateLimit = 100;
     }
-    array3.push(requestArray[x]);
-    if (array3.length == 5 || x == requestArray.length - 1) {
+    fiveRequests.push(requestArray[x]);
+    if (fiveRequests.length == 5 || x == requestArray.length - 1) {
       let promiseList = [];
-      promiseList = array3.map((x) => {
+      promiseList = fiveRequests.map((x) => {
         return modifyAxiosInstance({
           path: x.path,
           query: x.query,
@@ -126,12 +128,9 @@ async function multipleAxiosRequest(requestArray) {
         if (result.status == "rejected") {
           otherRateLimit--;
           console.log(result.reason.code);
-          retryList.push(array3[index]);
+          retryList.push(fiveRequests[index]);
         } else {
-          unsortedKlines.push([
-            array3[index].sequence,
-            result.value.data.data.rows,
-          ]);
+          unsortedKlines.push([result.value.data.data.rows]);
           if (
             smallestRateLimit > result.value.headers["x-ratelimit-remaining"]
           ) {
@@ -164,10 +163,7 @@ async function multipleAxiosRequest(requestArray) {
             otherRateLimit--;
             console.log(result.reason.code);
           } else {
-            unsortedKlines.push([
-              retryList[index].sequence,
-              result.value.data.data.rows,
-            ]);
+            unsortedKlines.push([result.value.data.data.rows]);
             if (
               smallestRateLimit > result.value.headers["x-ratelimit-remaining"]
             ) {
@@ -191,7 +187,7 @@ async function multipleAxiosRequest(requestArray) {
           }
         }
       }
-      array3 = [];
+      fiveRequests = [];
     }
   }
 
@@ -215,6 +211,7 @@ async function SortingKlinesAndCalculateEMA(unsortedKlines) {
   unsortedKlines.sort(function (a, b) {
     return a[0] - b[0];
   });
+  //why do we have to do this??
   for (let x = 0; x < unsortedKlines.length; x++) {
     sortedKlines = [...sortedKlines, ...unsortedKlines[x][1]];
   }
@@ -245,7 +242,7 @@ async function backtester() {
 
   testerKlines = await fetchListOfKlines({
     symbol: symbol,
-    resolution: 3600,
+    resolution: 1800,
     totalBarToFetch: totalBars,
   });
 

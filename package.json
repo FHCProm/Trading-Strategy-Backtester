@@ -4,7 +4,7 @@
   "description": "this is for testing MACD",
   "main": "MACD_Testing.mjs",
   "scripts": {
-    "test": "node MACD_Testing.mjs"
+    "test": "npx tsc && node dist/main.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,5 +14,8 @@
     "dotenv": "^16.4.5",
     "moment": "^2.30.1",
     "technicalindicators": "^3.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
   }
 }
