@@ -114,7 +114,7 @@ function sortKlines(klines:Kline[]):Kline[]{
 
 
 async function backtester() {
-  let totalBars = 50000;
+  let totalBars = 20000;
   let symbol = "BTCUSD";
 
   const unsortedKlines = await fetchListOfKlines({
